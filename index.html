@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارش بازدید از کارخانه - واحد مالی</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --success: #16a34a;
+            --danger: #dc2626;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        h2, h3 {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 0;
+        }
+        .step-section {
+            display: none;
+        }
+        .step-section.active {
+            display: block;
+        }
+        .name-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 24px 0;
+        }
+        .name-btn {
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid var(--border-color);
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .name-btn:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="date"], textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .event-box {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px dashed var(--border-color);
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-secondary {
+            background-color: #64748b;
+            margin-top: 8px;
+        }
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+        .badge {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        #statusMessage {
+            margin-top: 16px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- مرحله ۱: انتخاب نام کاربر -->
+    <div id="stepName" class="step-section active">
+        <h2>گزارش بازدید تیمی کارخانه</h2>
+        <p style="text-align: center; color: #64748b;">لطفاً نام خود را برای شروع ثبت گزارش انتخاب کنید:</p>
+        <div class="name-grid">
+            <button type="button" class="name-btn" onclick="selectUser('سجاد')">سجاد</button>
+            <button type="button" class="name-btn" onclick="selectUser('پویان')">پویان</button>
+            <button type="button" class="name-btn" onclick="selectUser('محمدصالح')">محمدصالح</button>
+            <button type="button" class="name-btn" onclick="selectUser('سبحان')">سبحان</button>
+        </div>
+    </div>
+
+    <!-- مرحله ۲: فرم اصلی گزارش -->
+    <div id="stepForm" class="step-section">
+        <div>
+            <span class="badge" id="selectedUserBadge">کاربر: </span>
+            <button type="button" onclick="changeUser()" style="float: left; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 13px;">تغییر نام</button>
+        </div>
+
+        <h3>فرم گزارش واحد مالی</h3>
+        <form id="visitForm" onsubmit="submitForm(event)">
+            
+            <!-- اطلاعات عمومی بازدید -->
+            <fieldset style="border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <legend style="font-weight: bold; color: var(--primary); padding: 0 6px;">اطلاعات کلی بازدید</legend>
+                
+                <div class="form-group">
+                    <label>تاریخ بازدید:</label>
+                    <input type="date" id="visitDate" required>
+                </div>
+                <div class="form-group">
+                    <label>نام کارخانه:</label>
+                    <input type="text" id="factoryName" placeholder="مثلا: کارخانه صنعتی ..." required>
+                </div>
+                <div class="form-group">
+                    <label>موقعیت مکانی (شهر / شهرک صنعتی):</label>
+                    <input type="text" id="location" placeholder="مثلا: شهرک صنعتی ..." required>
+                </div>
+                <div class="form-group">
+                    <label>بخش‌های بازدید شده:</label>
+                    <input type="text" id="visitedSection" placeholder="مثلا: حسابداری، انبار، مالی مدیریت" required>
+                </div>
+                <div class="form-group">
+                    <label>هدف اصلی بازدید:</label>
+                    <textarea id="visitGoal" placeholder="هدف از این بازدید چیست؟"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>نام مصاحبه‌شونده / راهنما:</label>
+                    <input type="text" id="intervieweeName" placeholder="نام مسئول مربوطه">
+                </div>
+                <div class="form-group">
+                    <label>سمت مصاحبه‌شونده:</label>
+                    <input type="text" id="intervieweeRole" placeholder="مثلا: مدیر مالی">
+                </div>
+                <div class="form-group">
+                    <label>شرح کلی بازدید و فضا:</label>
+                    <textarea id="generalDescription" placeholder="توضیحات کلی درباره فضا و وضعیت کلی واحد مالی..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>مشاهدات بالینی و نکات مهم اولیه:</label>
+                    <textarea id="observations" placeholder="نکاتی که در نگاه اول جلب توجه کرد..."></textarea>
+                </div>
+            </fieldset>
+
+            <!-- ثبت رویدادها با ساعت آنلاین -->
+            <fieldset style="border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <legend style="font-weight: bold; color: var(--primary); padding: 0 6px;">ثبت رویدادها با زمان آنلاین</legend>
+                <div class="form-group">
+                    <label>عنوان یا شرح رویداد / اتفاق در بازدید:</label>
+                    <input type="text" id="eventTitle" placeholder="مثلا: ورود به اتاق مدیر مالی یا شروع بررسی بودجه">
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="logEventWithServerTime()">ثبت زمان این رویداد</button>
+                <div id="eventsLogList" style="margin-top: 10px; font-size: 13px; color: #475569;"></div>
+                <input type="hidden" id="eventsHiddenField" name="eventsHiddenField">
+            </fieldset>
+
+            <!-- سوالات تخصصی واحد مالی -->
+            <fieldset style="border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <legend style="font-weight: bold; color: var(--primary); padding: 0 6px;">پرسش‌نامه تخصصی واحد مالی</legend>
+
+                <div class="form-group">
+                    <label>۱. فعالیت‌های جاری واحد مالی شامل چه مواردی است؟</label>
+                    <textarea name="q1"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۲. ساختار و چارت سازمانی واحد مالی به چه شکل است؟</label>
+                    <textarea name="q2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۳. واحد مالی بیشتر نقش ثبت و بررسی دارد یا در برنامه‌ریزی و تصمیم‌گیری مشارکت می‌کند؟</label>
+                    <textarea name="q3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۴. مهم‌ترین گزارشی که واحد مالی به مدیریت ارشد می‌دهد چیست؟</label>
+                    <textarea name="q4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۵. وقتی واحد دیگه‌ای درخواست بودجه یا هزینه داره، فرآیند بررسی و تأییدش چطوره؟</label>
+                    <textarea name="q5"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۶. واحد مالی چطور با واحدهای دیگه مثل تولید یا فروش هماهنگ می‌شه؟</label>
+                    <textarea name="q6"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۷. بزرگ‌ترین چالشی که واحد مالی معمولاً باهاش روبه‌رو می‌شه چیه؟</label>
+                    <textarea name="q7"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۸. هزینه‌های سربار تولید چگونه محاسبه و تخصیص داده می‌شوند؟</label>
+                    <textarea name="q8"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۹. درآمدهای غیرعملیاتی شامل چه مواردی است؟ (با مثال)</label>
+                    <textarea name="q9"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۱۰. بهای تمام‌شده کالای فروش‌رفته در شرایط تورم بالا چگونه محاسبه می‌شود؟</label>
+                    <textarea name="q10"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>۱۱. روش‌ها و ابزارهای محاسبه معادل ریالی مواد اولیه ارزی/وارداتی چیست؟</label>
+                    <textarea name="q11"></textarea>
+                </div>
+            </fieldset>
+
+            <!-- نکات تکمیلی و آزاد -->
+            <div class="form-group">
+                <label>نکات آزاد و سایر ملاحظات:</label>
+                <textarea id="extraNotes" placeholder="هر نکته دیگری که جا ماند..."></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">ثبت نهایی گزارش در گوگل‌شیت</button>
+            <div id="statusMessage"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // آدرس وب‌اپ گوگل اسکریپت شما
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPwMnJ2kcl2cAAjL7S81gPHZA-hgZEiKIx6-XQeSfafWqL2ZI_DJhVOibK_ha-mGg/exec';
+
+    let currentUser = '';
+    let capturedEvents = [];
+
+    // تنظیم تاریخ امروز به صورت پیش‌فرض
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('visitDate');
+        if (dateInput) dateInput.value = today;
+
+        loadDraft();
+        autoSaveDraft();
+    });
+
+    function selectUser(name) {
+        currentUser = name;
+        document.getElementById('selectedUserBadge').innerText = 'کاربر: ' + name;
+        document.getElementById('stepName').classList.remove('active');
+        document.getElementById('stepForm').classList.add('active');
+    }
+
+    function changeUser() {
+        if (confirm('آیا می‌خواهید کاربر را تغییر دهید؟')) {
+            document.getElementById('stepForm').classList.remove('active');
+            document.getElementById('stepName').classList.add('active');
+        }
+    }
+
+    // گرفتن زمان آنلاین از سرور (یا fallback به ساعت سیستم)
+    async function logEventWithServerTime() {
+        const titleInput = document.getElementById('eventTitle');
+        const title = titleInput.value.trim();
+        if (!title) {
+            alert('لطفاً عنوان رویداد را وارد کنید.');
+            return;
+        }
+
+        let timeStr = '';
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=time`);
+            const data = await response.json();
+            timeStr = data.time || new Date().toLocaleTimeString('fa-IR');
+        } catch (e) {
+            timeStr = new Date().toLocaleTimeString('fa-IR') + ' (محلی)';
+        }
+
+        capturedEvents.push({ time: timeStr, title: title });
+        updateEventsDisplay();
+        titleInput.value = '';
+    }
+
+    function updateEventsDisplay() {
+        const listDiv = document.getElementById('eventsLogList');
+        const hiddenField = document.getElementById('eventsHiddenField');
+        
+        let html = '<ul>';
+        capturedEvents.forEach((ev, idx) => {
+            html += `<li><b>[${ev.time}]</b> ${ev.title}</li>`;
+        });
+        html += '</ul>';
+        listDiv.innerHTML = html;
+        hiddenField.value = JSON.stringify(capturedEvents);
+    }
+
+    // ذخیره موقت در مرورگر
+    function autoSaveDraft() {
+        const formElements = document.querySelectorAll('#visitForm input, #visitForm textarea');
+        formElements.forEach(el => {
+            el.addEventListener('input', () => {
+                const formData = {};
+                formElements.forEach(input => {
+                    formData[input.id || input.name] = input.value;
+                });
+                formData.currentUser = currentUser;
+                formData.capturedEvents = capturedEvents;
+                localStorage.setItem('factory_visit_draft', JSON.stringify(formData));
+            });
+        });
+    }
+
+    function loadDraft() {
+        const saved = localStorage.getItem('factory_visit_draft');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.currentUser) {
+                    currentUser = data.currentUser;
+                    document.getElementById('selectedUserBadge').innerText = 'کاربر: ' + currentUser;
+                    document.getElementById('stepName').classList.remove('active');
+                    document.getElementById('stepForm').classList.add('active');
+                }
+                if (data.capturedEvents) {
+                    capturedEvents = data.capturedEvents;
+                    updateEventsDisplay();
+                }
+                for (const key in data) {
+                    const el = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+                    if (el) el.value = data[key];
+                }
+            } catch (e) {
+                console.error('خطا در بارگذاری پیش‌نویس', e);
+            }
+        }
+    }
+
+    // ارسال فرم به Google Sheets
+    async function submitForm(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMsg = document.getElementById('statusMessage');
+
+        submitBtn.classList.add('loading');
+        submitBtn.innerText = 'در حال ارسال و ثبت در گوگل‌شیت...';
+        statusMsg.style.color = 'var(--primary)';
+        statusMsg.innerText = 'لطفاً صبور باشید...';
+
+        const payload = {
+            user: currentUser,
+            visitDate: document.getElementById('visitDate').value,
+            factoryName: document.getElementById('factoryName').value,
+            location: document.getElementById('location').value,
+            visitedSection: document.getElementById('visitedSection').value,
+            visitGoal: document.getElementById('visitGoal').value,
+            intervieweeName: document.getElementById('intervieweeName').value,
+            intervieweeRole: document.getElementById('intervieweeRole').value,
+            generalDescription: document.getElementById('generalDescription').value,
+            observations: document.getElementById('observations').value,
+            events: document.getElementById('eventsHiddenField').value,
+            q1: document.querySelector('[name="q1"]').value,
+            q2: document.querySelector('[name="q2"]').value,
+            q3: document.querySelector('[name="q3"]').value,
+            q4: document.querySelector('[name="q4"]').value,
+            q5: document.querySelector('[name="q5"]').value,
+            q6: document.querySelector('[name="q6"]').value,
+            q7: document.querySelector('[name="q7"]').value,
+            q8: document.querySelector('[name="q8"]').value,
+            q9: document.querySelector('[name="q9"]').value,
+            q10: document.querySelector('[name="q10"]').value,
+            q11: document.querySelector('[name="q11"]').value,
+            extraNotes: document.getElementById('extraNotes').value
+        };
+
+        try {
+            // ارسال با استفاده از فرم‌دیتا برای جلوگیری از خطاهای CORS
+            const formBody = new URLSearchParams();
+            for (const key in payload) {
+                formBody.append(key, payload[key]);
+            }
+
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formBody
+            });
+
+            // تأیید ذخیره‌سازی موفق با استعلام از سرور
+            let verified = false;
+            for (let i = 0; i < 3; i++) {
+                await new Promise(r => setTimeout(r, 1500));
+                try {
+                    const checkRes = await fetch(`${SCRIPT_URL}?action=status&user=${encodeURIComponent(currentUser)}&date=${encodeURIComponent(payload.visitDate)}`);
+                    const checkData = await checkRes.json();
+                    if (checkData.exists) {
+                        verified = true;
+                        break;
+                    }
+                } catch (err) {}
+            }
+
+            statusMsg.style.color = 'var(--success)';
+            statusMsg.innerText = '✔ گزارش با موفقیت در گوگل‌شیت ثبت شد!';
+            localStorage.removeItem('factory_visit_draft');
+            
+            setTimeout(() => {
+                alert('گزارش شما با موفقیت ثبت شد.');
+                location.reload();
+            }, 1500);
+
+        } catch (error) {
+            console.error(error);
+            statusMsg.style.color = 'var(--danger)';
+            statusMsg.innerText = '❌ خطا در ارتباط با سرور. لطفاً مجدد تلاش کنید.';
+        } finally {
+            submitBtn.classList.remove('loading');
+            submitBtn.innerText = 'ثبت نهایی گزارش در گوگل‌شیت';
+        }
+    }
+</script>
+
+</body>
+</html>
